@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate AI Music</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0d0d0d;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("{{ url_for('static', filename='images/pia.jpg') }}") no-repeat center center/cover;
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            margin: 10px 0 5px;
+            font-weight: 500;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            background: #222;
+            color: white;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #2575fc, #6a11cb);
+            transform: scale(1.05);
+        }
+
+        a {
+            display: block;
+            margin-top: 10px;
+            color: #6a11cb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            color: #2575fc;
+        }
+
+        /* Loader Styles */
+        #loader {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+            color: cyan;
+            font-weight: bold;
+        }
+
+        .spinner {
+            margin: 10px auto;
+            width: 40px;
+            height: 40px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-top-color: cyan;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+
+    <div class="container">
+        <h1>Generate AI Music</h1>
+        <form method="POST" onsubmit="showLoader(event)">
+            <label for="duration">Time (Max 300s):</label>
+            <input type="number" id="duration" name="duration" min="1" max="300" placeholder="Enter Time in Sec" required>
+
+            <label for="prompt">Prompt:</label>
+            <input type="text" id="prompt" name="prompt" placeholder="Describe music style..." required>
+
+            <button type="submit" class="generate-btn">Generate Music</button>
+        </form>
+
+        <!-- Loader -->
+        <div id="loader">
+            <div class="spinner"></div>
+            <p>Generating music... Please wait 🎵</p>
+        </div>
+
+        {% if message %}
+            <p class="message {{ 'error' if 'Error' in message else 'success' }}">{{ message }}</p>
+        {% endif %}
+
+        {% if audio_url %}
+        <div id="audioContainer">
+            <h3>Generated Audio:</h3>
+            <audio controls>
+                <source src="{{ audio_url }}" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+        <!-- Hide loader when audio is available -->
+        <script>document.getElementById("loader").style.display = "none";</script>
+    {% endif %}
+    </div>
+
+    <script>
+        function showLoader() {
+            // Hide previous audio
+            let audioContainer = document.getElementById("audioContainer");
+            if (audioContainer) {
+                audioContainer.style.display = "none";
+            }
+    
+            // Show loader
+            document.getElementById("loader").style.display = "block";
+    
+            // Disable the generate button
+            let generateBtn = document.querySelector(".generate-btn");
+            generateBtn.disabled = true;
+            generateBtn.style.opacity = "0.5";  // Make it look disabled
+            generateBtn.innerText = "Generating...";  // Change button text
+        }
+    
+        // Re-enable the button after page reload (when music is generated)
+        window.onload = function() {
+            let generateBtn = document.querySelector(".generate-btn");
+            if (generateBtn) {
+                generateBtn.disabled = false;
+                generateBtn.style.opacity = "1";
+                generateBtn.innerText = "Generate Music";  // Reset button text
+            }
+        };
+    </script>
+    
+</body>
+</html>
